@@ -6,7 +6,7 @@ We are a company based in Munich, Germany and are expanding internationally to t
 
 ## the data
 
-Please use https://currencylayer.com/ to retrieve raw currency data, and please utilize the official client library (https://www.npmjs.com/package/@apilayer/currencylayer). 
+Please use https://currencylayer.com/ to retrieve raw currency data, and please utilize the client library provided here: (https://www.npmjs.com/package/currencylayer-client). 
 
 ## your stack
 
