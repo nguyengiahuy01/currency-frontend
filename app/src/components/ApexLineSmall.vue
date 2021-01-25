@@ -1,13 +1,26 @@
 <template>
-  <card-base :bgColor="bgColorCard">
+  <card-base :bgColor="'linear-gradient( 135deg, #ABDCFF 10%, #0396FF 100%)'">
     <div class="row">
-      <div class="col-12 text-h6 text-white">
-        {{ title.label }}<br>
-        <small>{{ title.description }}</small>
+      <div class="col-2 text-h6 text-white">
+        <q-select v-model="selected" :options="options" label="Währung">
+          <template v-slot:option="scope">
+            <q-item
+              v-bind="scope.itemProps"
+              v-on="scope.itemEvents"
+            >
+              <q-item-section avatar>
+                <q-icon :name="scope.opt.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label v-html="scope.opt.label" />
+                <q-item-label caption>{{ scope.opt.description }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
       </div>
       <div class="col-12">
       <apexchart ref="realtimeChart" type="line" height="90" :options="chartOptions" :series="series" />
-      <q-select v-model="selected" :options="options" color="white"/>
       </div>
     </div>
   </card-base>
@@ -21,20 +34,31 @@ export default {
     CardBase
   },
   props: {
-    bgColorCard: {
-      type: String
-    },
-    title: {
-      type: Object
+    options: {
+      type: Array
     }
+  },
+  async mounted () {
+    const quotesList = []
+    const data = []
+    for (let i = 14; i > 0; i--) {
+      const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
+      this.chartOptions.xaxis.categories.push(date)
+      const quotes = (await this.$client.historical({date})).quotes
+      quotesList.push(quotes)
+    }
+    for (const quotes of quotesList) {
+      data.push(quotes['USDEUR'])
+    }
+    this.series.push({
+      name: 'USD - EUR',
+      data
+    })
   },
   data () {
     return {
-      series: [{
-        data: [10, 41, 850, 51, 260, 62, 420, 91, 600]
-      }],
-      options: ['EUR', 'CHF'],
-      selected: null,
+      selected: this.options[0],
+      series: [],
       chartOptions: {
         colors: ['#FFF', '#17ead9', '#f02fc2'],
         animations: {
@@ -68,7 +92,7 @@ export default {
           width: 4
         },
         xaxis: {
-          categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+          categories: [],
           axisBorder: {
             show: false
           },
