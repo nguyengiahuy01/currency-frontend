@@ -2,10 +2,12 @@
   <card-base :bgColor="bgColorCard">
     <div class="row">
       <div class="col-12 text-h6 text-white">
-        Line
+        {{ title.label }}<br>
+        <small>{{ title.description }}</small>
       </div>
       <div class="col-12">
       <apexchart ref="realtimeChart" type="line" height="90" :options="chartOptions" :series="series" />
+      <q-select v-model="selected" :options="options" color="white"/>
       </div>
     </div>
   </card-base>
@@ -21,6 +23,9 @@ export default {
   props: {
     bgColorCard: {
       type: String
+    },
+    title: {
+      type: Object
     }
   },
   data () {
@@ -28,6 +33,8 @@ export default {
       series: [{
         data: [10, 41, 850, 51, 260, 62, 420, 91, 600]
       }],
+      options: ['EUR', 'CHF'],
+      selected: null,
       chartOptions: {
         colors: ['#FFF', '#17ead9', '#f02fc2'],
         animations: {
