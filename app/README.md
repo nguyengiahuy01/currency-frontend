@@ -6,7 +6,12 @@ currency exchange
 ```bash
 npm install
 ```
-
+## Install Quasar CLI
+```bash
+npm install -g @quasar/cli
+or 
+$ npx quasar dev
+```
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
 ```bash
 quasar dev
