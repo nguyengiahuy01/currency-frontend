@@ -1,5 +1,5 @@
 <template>
-  <card-base :bgColor="'linear-gradient( 135deg, #ABDCFF 10%, #0396FF 100%)'">
+  <card-base :bgColor="'linear-gradient( 135deg, #FFF 10%, #eef2ff 100%)'">
     <div class="row">
       <div class="col-2 text-h6 text-white">
         <q-select v-model="selected" :options="options" label="Währung">
