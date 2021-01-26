@@ -6,8 +6,7 @@
           <q-card-section>
             <div class="text-h6">Currency Währungsrechner</div>
           </q-card-section>
-          <ApexLineSmall
-            :options="options"/>
+          <ApexLineSmall @convert="convert"/>
           <!-- <Chart/> -->
           <q-card-section class="q-pt-xs">
             <q-card-section horizontal>

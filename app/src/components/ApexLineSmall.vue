@@ -3,24 +3,10 @@
     <div class="row">
       <div class="col-2 text-h6 text-white">
         <q-select v-model="selected" :options="options" label="Währung">
-          <template v-slot:option="scope">
-            <q-item
-              v-bind="scope.itemProps"
-              v-on="scope.itemEvents"
-            >
-              <q-item-section avatar>
-                <q-icon :name="scope.opt.icon" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label v-html="scope.opt.label" />
-                <q-item-label caption>{{ scope.opt.description }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </template>
         </q-select>
       </div>
       <div class="col-12">
-      <apexchart ref="realtimeChart" type="line" height="90" :options="chartOptions" :series="series" />
+        <apexchart ref="realtimeChart" type="line" height="200" :options="chartOptions" :series="series" style="padding: 2em"/>
       </div>
     </div>
   </card-base>
@@ -33,34 +19,29 @@ export default {
   components: {
     CardBase
   },
-  props: {
-    options: {
-      type: Array
-    }
-  },
   async mounted () {
-    const quotesList = []
-    const data = []
-    for (let i = 14; i > 0; i--) {
+    for (let i = 0; i < 14; i++) {
       const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
-      this.chartOptions.xaxis.categories.push(date)
-      const quotes = (await this.$client.historical({date})).quotes
-      quotesList.push(quotes)
+      this.chartOptions.xaxis.categories.unshift(date)
+      const response = await this.$client.historical({date})
+      this.chartAllData.unshift(response)
     }
-    for (const quotes of quotesList) {
-      data.push(quotes['USDEUR'])
+    this.buildChart('USD')
+  },
+  watch: {
+    selected (val) {
+      this.buildChart(val)
+      console.log(this.series)
     }
-    this.series.push({
-      name: 'USD - EUR',
-      data
-    })
   },
   data () {
     return {
-      selected: this.options[0],
+      selected: 'USD',
+      options: ['USD', 'EUR', 'CHF'],
+      chartAllData: [],
       series: [],
       chartOptions: {
-        colors: ['#FFF', '#17ead9', '#f02fc2'],
+        colors: ['#17ead9', '#f02fc2'],
         animations: {
           enabled: true,
           easing: 'easeinout',
@@ -89,10 +70,10 @@ export default {
         },
         stroke: {
           curve: 'smooth',
-          width: 4
+          width: 2
         },
         xaxis: {
-          categories: [],
+          categories: ['Tommorow'],
           axisBorder: {
             show: false
           },
@@ -105,13 +86,65 @@ export default {
         },
         yaxis: {
           labels: {
-            show: false,
+            show: true,
             style: {
               color: '#fff'
             }
           }
         }
       }
+    }
+  },
+  methods: {
+    buildChart(val) {
+      const serieEUR = {
+        name: 'EUR',
+        data: []
+      }
+      const serieCHF = {
+        name: 'CHF',
+        data: []
+      }
+      const serieUSD = {
+        name: 'USD',
+        data: []
+      }
+      if (val === 'USD') {
+        for (let i = 0; i < 14; i++) {
+          serieEUR.name = 'USD-EUR'
+          serieCHF.name = 'USD-CHF'
+          serieEUR.data.unshift(this.chartAllData[i].quotes['USDEUR'])
+          serieCHF.data.unshift(this.chartAllData[i].quotes['USDCHF'])
+        }
+        this.series = [serieEUR, serieCHF]
+      } else if (val === 'EUR') {
+        serieUSD.name = 'EUR-USD'
+        serieCHF.name = 'EUR-CHF'
+        for (let i = 0; i < 14; i++) {
+          const USDEUR = this.chartAllData[i].quotes['USDEUR']
+          const USDCHF = this.chartAllData[i].quotes['USDCHF']
+          const EURUSD = (1/USDEUR)
+          const EURCHF = (1/USDEUR)*USDCHF
+          serieUSD.data.unshift(EURUSD)
+          serieCHF.data.unshift(EURCHF)
+        }
+        this.series = [serieUSD, serieCHF]
+      } else {
+        serieUSD.name = 'CHF-USD'
+        serieEUR.name = 'CHF-EUR'
+        for (let i = 0; i < 14; i++) {
+          const USDEUR = this.chartAllData[i].quotes['USDEUR']
+          const USDCHF = this.chartAllData[i].quotes['USDCHF']
+          const CHFUSD = 1/USDCHF
+          const CHFEUR = (1/USDCHF)*USDEUR
+          serieUSD.data.unshift(CHFUSD)
+          serieEUR.data.unshift(CHFEUR)
+        }
+        this.series = [serieUSD, serieEUR]
+      }
+    },
+    convertCurrency (curr, amount) {
+      return new Intl.NumberFormat('de-DE', { style: 'currency', currency: curr }).format(amount)
     }
   }
 }

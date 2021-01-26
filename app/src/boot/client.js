@@ -1,4 +1,4 @@
 export default ({ Vue }) => {
     const CurrencyLayerClient = require('currencylayer-client')
-    Vue.prototype.$client = new CurrencyLayerClient({apiKey: 'c2500f69486298bb5f8529aa229c32fc'})
+    Vue.prototype.$client = new CurrencyLayerClient({apiKey: 'c7f688d0f675f61ef7b79b542f8be33e'})
 }
